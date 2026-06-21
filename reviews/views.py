@@ -66,8 +66,8 @@ def create_review_rating(request):
 @authentication_classes([JWTAuthentication])
 @parser_classes([MultiPartParser, FormParser])
 def update_review_rating(request, pk):
-    review = get_object_or_404(ReviewAndRating, pk=pk)
-    serializer = ReviewAndRatingSerializer(review, data=request.data,  user=request.user, partial=True)
+    review = get_object_or_404(ReviewAndRating, user=request.user, pk=pk)
+    serializer = ReviewAndRatingSerializer(review, data=request.data, partial=True)
     serializer.is_valid(raise_exception=True)
     serializer.save(user=request.user)
     return Response(serializer.data, status=status.HTTP_200_OK)
@@ -82,8 +82,6 @@ def update_review_rating(request, pk):
             type=openapi.TYPE_INTEGER
         )
     ],
-    request_body=ReviewAndRatingSerializer,
-    responses={200: ReviewAndRatingSerializer(), 400: "bad request"},
     operation_description="delete review and rating "
 )
 @api_view(["DELETE"])

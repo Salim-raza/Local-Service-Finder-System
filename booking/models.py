@@ -19,5 +19,6 @@ class Booking(models.Model):
     booking_data = models.DateField()
     booking_time = models.TimeField()
     completed_time = models.DateTimeField(null=True, blank=True)
+    final_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)

@@ -13,4 +13,4 @@ class ReviewAndRating(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Review by {self.user.email} for {self.service.name}"
+        return f"{self.id} Review by {self.user.email} for {self.service.name} for {self.rating} stars"

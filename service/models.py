@@ -10,7 +10,6 @@ class Service(models.Model):
     description = models.TextField(null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     our_base_price = models.DecimalField(max_digits=10, decimal_places=2)
-    contact_base_price = models.DecimalField(max_digits=10, decimal_places=2)
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
     
