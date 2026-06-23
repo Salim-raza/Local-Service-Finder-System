@@ -11,7 +11,7 @@ class ServiceCreateSerializers(serializers.ModelSerializer):
 class ServiceUpdateSerializers(serializers.ModelSerializer):
     class Meta:
         model = Service
-        fields = ["name", "description", "our_base_price", "image", "contact_base_price"]
+        fields = ["name", "description", "our_base_price", "image"]
         read_only_fields = ["provider", "create_at", "update_at"]
         
         
