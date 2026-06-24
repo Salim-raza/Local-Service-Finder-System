@@ -49,43 +49,6 @@ def signup(request):
         "user": UserCreateSerializers(user).data,
         "token": token
         }, status=status.HTTP_201_CREATED)
-    
-@swagger_auto_schema(
-    method="patch",
-    manual_parameters=[
-        openapi.Parameter(
-            'pk',
-            openapi.IN_PATH,
-            description="user id",
-            type=openapi.TYPE_INTEGER
-        )
-    ],
-    responses={
-        200: openapi.Response(description="Account activated successfully"),
-        400: openapi.Response(description="This user does not require approval"),
-        404: openapi.Response(description="User not found")
-    }
-) 
-@api_view(["PATCH"])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAdmin])
-def pending_account_active(request, pk):
-    user = get_object_or_404(CustomUser, pk=pk)
-    if user.is_approved:
-        return Response({"error": "User already approved"},
-            status=status.HTTP_400_BAD_REQUEST)
-    
-    if user.role != "SERVICE_PROVIDER":
-        return Response(
-            {"error": "This user does not require approval"},
-            status=status.HTTP_400_BAD_REQUEST)
-        
-    user.is_approved = True
-    user.is_active = True
-    user.save()
-    return Response({"message": "account activate"}, status=status.HTTP_200_OK)
-
-
 
 @swagger_auto_schema(
     method="get",
