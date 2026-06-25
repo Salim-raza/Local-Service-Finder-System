@@ -6,7 +6,8 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
+from accounts.models import CustomUser
+from accounts.serializers import UserCreateSerializers
 
 @api_view(["GET"])
 def admin_panel(request):
@@ -52,3 +53,23 @@ def pending_account_active(request, pk):
     user.save()
     return Response({"message": "account activate"}, status=status.HTTP_200_OK)
 
+
+
+@swagger_auto_schema(
+    method="get",
+    responses={200: UserCreateSerializers(many=True), 400: "Bad Request"},
+    operation_description="get all pending account"
+)
+@api_view(["GET"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAdmin])
+def pending_account_list(request):
+    
+    users = CustomUser.objects.filter(
+        role="SERVICE_PROVIDER",
+        is_approved=False,
+        is_active=False
+    )
+    
+    serializer = UserCreateSerializers(users, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
