@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
-from time import timezone
+from django.utils import timezone
 
 
 @api_view(["GET"])
@@ -110,3 +110,31 @@ def complete_booking(request, pk):
     booking.save()
     serializers = BookingSerializers(booking)
     return Response({"message": "Booking completed", "data": serializers.data}, status=status.HTTP_200_OK)
+
+
+
+@swagger_auto_schema(
+    method="GET",
+    response={200: "total accept booking"},
+    operation_description="total accept booking"
+)
+@api_view(["GET"])
+@permission_classes([IsServiceProvider])
+@authentication_classes([JWTAuthentication])
+def total_accept_booking(request):
+    booking = Booking.objects.filter(service__provider=request.user, status="accepted").count()
+    return Response(booking, status=status.HTTP_200_OK)
+
+
+
+@swagger_auto_schema(
+    method="GET",
+    response={200: "total completed booking"},
+    operation_description="total completed booking"
+)
+@api_view(["GET"])
+@permission_classes([IsServiceProvider])
+@authentication_classes([JWTAuthentication])
+def total_completed_booking(request):
+    booking = Booking.objects.filter(service__provider=request.user, status="completed").count()
+    return Response(booking, status=status.HTTP_200_OK)
