@@ -16,7 +16,6 @@ def admin_panel(request):
     }, status=status.HTTP_200_OK)
 
 
-
    
 @swagger_auto_schema(
     method="patch",
@@ -73,3 +72,31 @@ def pending_account_list(request):
     
     serializer = UserCreateSerializers(users, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+@swagger_auto_schema(
+    method="GET",
+    Response={200: "total activate account"}, 
+    operation_description="total activate account count"
+)
+@api_view(["GET"])
+@permission_classes([IsAdmin])
+@authentication_classes([JWTAuthentication])
+def total_activate_account_count(request):
+    account =  CustomUser.objects.filter(role="SERVICE_PROVIDER", status="accepted").count()
+    return Response(account, status=status.HTTP_200_OK)
+
+
+
+@swagger_auto_schema(
+    method="GET",
+    Response={200: "total activate account"}, 
+    operation_description="total activate account count"
+)
+@api_view(["GET"])
+@permission_classes([IsAdmin])
+@authentication_classes([JWTAuthentication])
+def total_activate_pending_count(request):
+    account =  CustomUser.objects.filter(role="SERVICE_PROVIDER", is_approved=False).count()
+    return Response(account, status=status.HTTP_200_OK)
