@@ -71,7 +71,7 @@ def signin(request):
     if user is not None:
         token = get_tokens_for_user(user)
         return Response({"message": "Login Successfully .", "access_token" : token["access"], "refresh_token": token["refresh"]}, status=status.HTTP_200_OK)
-    return Response({"message": "Invalid Email OR Password."}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({"message": "Invalid Email OR Password."}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 logout_request = openapi.Schema(
