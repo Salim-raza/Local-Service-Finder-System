@@ -2,9 +2,11 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser
 from accounts.permission import IsCustomer, IsServiceProvider
+from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
+from django.core.mail import send_mail
 from django.utils import timezone
 from rest_framework import status
 from drf_yasg import openapi
@@ -16,7 +18,7 @@ from .models import *
     method='POST',
     request_body=BookingSerializers,
     responses={201: BookingSerializers(), 400: 'Bad Request'},
-    operation_description="Service Create"
+    operation_description="booking Create"
 )
 
 @api_view(["POST"])
@@ -24,10 +26,38 @@ from .models import *
 @authentication_classes([JWTAuthentication])
 @parser_classes([MultiPartParser, FormParser])
 def book_service(request):
-    serializers = BookingSerializers(data=request.data)
-    serializers.is_valid(raise_exception=True)
-    serializers.save(user=request.user)
-    return Response({"message": "service book successful", "data": serializers.data}, status=status.HTTP_201_CREATED)
+    serializer = BookingSerializers(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    booking = serializer.save(user=request.user)
+    
+    send_mail(
+        subject="booking confirmation",
+        message=f"""
+            Dear {request.user.first_name}
+
+            Thank you for your booking request!
+
+            Your booking request has been submitted successfully.
+
+            Booking ID: {booking.id}
+
+            What happens next?
+            • Your booking request has been sent to the service provider.
+            • The service provider will review your request.
+            • Once they accept it, your booking will be confirmed.
+            • We will notify you immediately after the booking is accepted.
+
+            Thank you for choosing our platform. We look forward to serving you!
+
+            Best Regards,
+            Customer Support Team
+        """,
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[request.user.email],
+        fail_silently=False,
+    )
+    return Response({"message": "service book successful", "data": serializer.data}, status=status.HTTP_201_CREATED)
+
 
 @swagger_auto_schema(
     method='PATCH',
