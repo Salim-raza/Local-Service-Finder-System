@@ -1,14 +1,16 @@
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from drf_yasg.utils import swagger_auto_schema
-from accounts.permission import IsServiceProvider
-from booking.models import Booking
 from booking.serializers import BookingSerializers
-from rest_framework.response import Response
-from rest_framework import status
+from accounts.permission import IsServiceProvider
+from drf_yasg.utils import swagger_auto_schema
 from django.shortcuts import get_object_or_404
-from drf_yasg import openapi
+from rest_framework.response import Response
+from django.core.mail import send_mail
+from booking.models import Booking
 from django.utils import timezone
+from rest_framework import status
+from django.conf import settings
+from drf_yasg import openapi
 
 
 @api_view(["GET"])
@@ -66,6 +68,22 @@ def accept_booking(request, pk):
     booking.status = 'accepted'
     booking.save()
     serializer = BookingSerializers(booking)
+    send_mail(
+        subject="you booking accept",
+        message=f"""
+        hello {booking.user.first_name}
+        
+        your booking request accepted service provider 
+        
+        Booking id : {booking.id}
+        thanks you
+        Customer Support Team
+        """,
+        
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[booking.user.email],
+        fail_silently=False
+    )
     return Response({"message": "Booking accepted", "data": serializer.data}, status=status.HTTP_200_OK)
 
 @swagger_auto_schema(
