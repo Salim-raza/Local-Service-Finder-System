@@ -101,6 +101,26 @@ def reject_booking(request, pk):
         booking.status == 'rejected'
         booking.save(user=request.user)
         serializer = BookingSerializers(booking)
+        send_mail(
+            subject="you booking rejected",
+            message=f"""
+            Hello {booking.user.first_name},
+
+            We are sorry to inform you that your booking request has been rejected.
+
+            Booking ID: {booking.id}
+
+            Please feel free to submit another booking request or contact our support team if you have any questions.
+
+            Thank you for choosing our service.
+
+            Regards,
+            Customer Support Team
+            """,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[booking.user.email],
+            fail_silently=False
+        )
         return Response({"message": "booking reject successfully", "data": serializer.data}, status=status.HTTP_200_OK)
     return Response({"details": "only pending booking"}, status=status.HTTP_404_NOT_FOUND)
 
