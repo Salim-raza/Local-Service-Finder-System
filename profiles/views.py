@@ -47,7 +47,26 @@ def get_profile(request):
     
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
+
+@swagger_auto_schema(
+    method="get",
+    manual_parameters=[
+        openapi.Parameter(
+            "id",
+            openapi.IN_PATH,
+            description="profile view user",
+            type=openapi.TYPE_INTEGER
+        )
+    ],
+    operation_description="get user profile"
+)
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_user_profile(request, id):
+    profile = Profile.objects.get(id=id)
+    serializer = ProfileSerializer(profile)
+    return Response(serializer.data, status=status.HTTP_200_OK)
  
 @swagger_auto_schema(
     method='PATCH',
