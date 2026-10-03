@@ -6,8 +6,8 @@ class UserCreateSerializers(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     class Meta:
         model = CustomUser
-        fields = ["first_name", "last_name", "role", "email", "password"]
-        read_only_fields = ["name", "create_at", "last_login", "is_approved", "is_active"]
+        fields = ["first_name", "last_name", "role", "email", "password", "name", "create_at", "last_login", "is_approved", "is_superuser", "is_active"]
+        read_only_fields = ["name", "create_at", "last_login", "is_superuser", "is_approved", "is_active"]
         
     def create(self, validated_data):
         return CustomUser.objects.create_user(

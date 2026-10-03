@@ -1,0 +1,15 @@
+[1mdiff --git a/dashboard/views/__pycache__/service_provider_dashboard.cpython-314.pyc b/dashboard/views/__pycache__/service_provider_dashboard.cpython-314.pyc[m
+[1mindex d9893a2..631d042 100644[m
+Binary files a/dashboard/views/__pycache__/service_provider_dashboard.cpython-314.pyc and b/dashboard/views/__pycache__/service_provider_dashboard.cpython-314.pyc differ
+[1mdiff --git a/dashboard/views/service_provider_dashboard.py b/dashboard/views/service_provider_dashboard.py[m
+[1mindex 18eb82e..770d48c 100644[m
+[1m--- a/dashboard/views/service_provider_dashboard.py[m
+[1m+++ b/dashboard/views/service_provider_dashboard.py[m
+[36m@@ -164,7 +164,6 @@[m [mdef total_accept_booking(request):[m
+     return Response(booking, status=status.HTTP_200_OK)[m
+ [m
+ [m
+[31m-[m
+ @swagger_auto_schema([m
+     method="GET",[m
+     response={200: "total completed booking"},[m
