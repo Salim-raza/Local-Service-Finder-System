@@ -17,6 +17,9 @@ from .models import *
 @swagger_auto_schema(
     method='POST',
     request_body=BookingSerializers,
+    # manual_parameters=[
+    #     openapi.Parameter('pk', openapi.IN_PATH, description="Service ID", type=openapi.TYPE_INTEGER)
+    # ],
     responses={201: BookingSerializers(), 400: 'Bad Request'},
     operation_description="booking Create"
 )
