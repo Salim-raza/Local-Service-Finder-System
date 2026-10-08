@@ -13,7 +13,7 @@ class IsAdminORServiceProvider(BasePermission):
         user = request.user
         if not user or not user.is_authenticated:
             return False
-        return user.role == "admin" or "SERVICE_PROVIDER"
+        return user.role in ("ADMIN", "SERVICE_PROVIDER")
     
 class IsServiceProvider(BasePermission):
     def has_permission(self, request, view):
