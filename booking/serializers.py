@@ -6,7 +6,17 @@ class BookingSerializers(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = "__all__"
-        read_only_fields = ["book_time", "completed_time", "status", "user"]
+        read_only_fields = [
+            "completed_time",
+            "status",
+            "user",
+            "final_price",
+            "cancellation_reason",
+            "cancelled_by",
+            "cancelled_at",
+            "created_at",
+            "updated_at",
+        ]
         
     def create(self, validated_data):
         service = validated_data["service"]
@@ -17,4 +27,4 @@ class BookingSerializers(serializers.ModelSerializer):
 class BookingUpdateSerializers(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ["note", "booking_data", "booking_time", "final_price"]
+        fields = ["note", "booking_time", "booking_date"]

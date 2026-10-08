@@ -10,6 +10,8 @@ from rest_framework import status
 
 
 @api_view(["GET"])
+@permission_classes([IsCustomer])
+@authentication_classes([JWTAuthentication])
 def customer_dashboard(request):
     return Response({
         "message": "welcome to customer dashboard"

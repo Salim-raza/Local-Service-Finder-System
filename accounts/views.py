@@ -209,7 +209,7 @@ def rest_password(request):
 
         if db_otp and str(otp) == str(db_otp.otp):
 
-            if db_otp.is_expire:
+            if db_otp.is_expire():
                 return Response({
                     "status": "error",
                     "message": "otp time expired"
@@ -217,6 +217,7 @@ def rest_password(request):
 
             user.set_password(new_password)
             user.save()
+            db_otp.delete()
 
             return Response({
                 "status": "success",

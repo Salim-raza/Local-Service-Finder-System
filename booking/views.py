@@ -76,11 +76,11 @@ def book_service(request):
 @authentication_classes([JWTAuthentication])
 @parser_classes([MultiPartParser, FormParser])
 def update_booking(request, pk):
-    booking = Booking.objects.get(pk=pk, user=request.user)
+    booking = get_object_or_404(Booking, pk=pk, user=request.user)
     if booking.status == "pending":
         serializer = BookingUpdateSerializers(booking, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        serializer.save(user=request.user)
+        serializer.save()
         return Response({"message": "booking update successfully", "data": serializer.data}, status=status.HTTP_200_OK)
     return Response({"message": "Only pending booking can be updated"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -106,8 +106,11 @@ def update_booking(request, pk):
 def cancel_booking(request, pk):
     booking = get_object_or_404(Booking, pk=pk, user=request.user)
     if booking.status == "pending":
-        booking.status == "cancelled"
-        booking.save(user=request.user)
+        booking.status = Booking.Status.CANCELLED
+        booking.cancelled_by = request.user
+        booking.cancelled_at = timezone.now()
+        booking.cancellation_reason = request.data.get("cancellation_reason", "")
+        booking.save()
         return Response({"message": "booking cancelled"}, status=status.HTTP_200_OK)
     return Response({"message": "only pending service cancelled"}, status=status.HTTP_400_BAD_REQUEST)
 

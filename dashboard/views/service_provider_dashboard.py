@@ -14,6 +14,8 @@ from drf_yasg import openapi
 
 
 @api_view(["GET"])
+@permission_classes([IsServiceProvider])
+@authentication_classes([JWTAuthentication])
 def provider_dashboard(request):
     return Response({
         "message": "welcome to service provider dashboard"
@@ -43,7 +45,10 @@ def get_pending_booking(request):
 @permission_classes([IsServiceProvider])
 @authentication_classes([JWTAuthentication])
 def get_accept_booking(request):
-    booking = Booking.objects.filter(service__provider=request.user, status="accept")
+    booking = Booking.objects.filter(
+        service__provider=request.user,
+        status=Booking.Status.ACCEPTED,
+    )
     serializer = BookingSerializers(booking, many=True)
     return Response({"message": "accept booking", "data": serializer.data}, status=status.HTTP_200_OK)
 
@@ -62,10 +67,10 @@ def get_accept_booking(request):
 @permission_classes([IsServiceProvider])
 @authentication_classes([JWTAuthentication])
 def accept_booking(request, pk):
-    booking = get_object_or_404(Booking, id=pk)
-    if booking.status != "pending":
+    booking = get_object_or_404(Booking, id=pk, service__provider=request.user)
+    if booking.status != Booking.Status.PENDING:
         return Response({"message": "Booking already processed"},status=status.HTTP_400_BAD_REQUEST)
-    booking.status = 'accepted'
+    booking.status = Booking.Status.ACCEPTED
     booking.save()
     serializer = BookingSerializers(booking)
     send_mail(
@@ -96,10 +101,10 @@ def accept_booking(request, pk):
 @permission_classes([IsServiceProvider])
 @authentication_classes([JWTAuthentication])
 def reject_booking(request, pk):
-    booking = get_object_or_404(Booking, pk=pk, user=request.user)
-    if booking.status == 'pending':
-        booking.status == 'rejected'
-        booking.save(user=request.user)
+    booking = get_object_or_404(Booking, pk=pk, service__provider=request.user)
+    if booking.status == Booking.Status.PENDING:
+        booking.status = Booking.Status.REJECTED
+        booking.save()
         serializer = BookingSerializers(booking)
         send_mail(
             subject="you booking rejected",
@@ -122,7 +127,7 @@ def reject_booking(request, pk):
             fail_silently=False
         )
         return Response({"message": "booking reject successfully", "data": serializer.data}, status=status.HTTP_200_OK)
-    return Response({"details": "only pending booking"}, status=status.HTTP_404_NOT_FOUND)
+    return Response({"details": "only pending booking"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -139,11 +144,14 @@ def reject_booking(request, pk):
 @permission_classes([IsServiceProvider])
 @authentication_classes([JWTAuthentication])
 def complete_booking(request, pk):
-    booking = Booking.objects.get(id=pk, service__provider=request.user)
-    if booking.status == Booking.Status.COMPLETED:
-        return Response({"message": "Already completed"},status=status.HTTP_400_BAD_REQUEST)
+    booking = get_object_or_404(Booking, id=pk, service__provider=request.user)
+    if booking.status != Booking.Status.ACCEPTED:
+        return Response(
+            {"message": "Only accepted bookings can be completed"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
-    booking.status == Booking.Status.COMPLETED
+    booking.status = Booking.Status.COMPLETED
     booking.completed_time = timezone.now()
     booking.save()
     serializers = BookingSerializers(booking)

@@ -45,7 +45,7 @@ def create_division(request):
 @permission_classes([IsAdmin])
 @authentication_classes([JWTAuthentication])
 def update_division(request, pk):
-    division = get_object_or_404(Division, pk=pk, user=request.user)
+    division = get_object_or_404(Division, pk=pk)
     serializers = divisionSerializers(division, data=request.data, partial=True)
     serializers.is_valid(raise_exception=True)
     serializers.save()
@@ -112,7 +112,7 @@ def create_district(request):
 @permission_classes([IsAdmin])
 @authentication_classes([JWTAuthentication])
 def update_district(request, pk):
-    district = get_object_or_404(District, pk=pk, user=request.user)
+    district = get_object_or_404(District, pk=pk)
     serializers = districtSerializers(district, data=request.data, partial=True)
     serializers.is_valid(raise_exception=True)
     serializers.save()

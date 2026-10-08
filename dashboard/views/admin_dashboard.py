@@ -10,6 +10,8 @@ from accounts.models import CustomUser
 from accounts.serializers import UserCreateSerializers
 
 @api_view(["GET"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAdmin])
 def admin_panel(request):
     return Response({
         "message": "welcome to admin dashboard"
@@ -84,7 +86,11 @@ def pending_account_list(request):
 @permission_classes([IsAdmin])
 @authentication_classes([JWTAuthentication])
 def total_activate_account_count(request):
-    account =  CustomUser.objects.filter(role="SERVICE_PROVIDER", status="accepted").count()
+    account = CustomUser.objects.filter(
+        role="SERVICE_PROVIDER",
+        is_approved=True,
+        is_active=True,
+    ).count()
     return Response(account, status=status.HTTP_200_OK)
 
 

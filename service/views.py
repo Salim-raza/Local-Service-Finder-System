@@ -91,8 +91,12 @@ def service(request):
 @permission_classes([IsAdminORServiceProvider])
 @authentication_classes([JWTAuthentication])
 def service_modify(request, id):
+    service_lookup = {"id": id}
+    if request.user.role != "ADMIN":
+        service_lookup["provider"] = request.user
+
     if request.method == "PATCH":
-        service = get_object_or_404(Service, id=id, provider=request.user)
+        service = get_object_or_404(Service, **service_lookup)
         serializers = ServiceUpdateSerializers(service, data=request.data, partial=True)
         serializers.is_valid(raise_exception=True)
         serializers.save()
@@ -104,7 +108,7 @@ def service_modify(request, id):
             }, status=status.HTTP_200_OK)
         
     elif request.method == "DELETE":
-        service = get_object_or_404(Service, id=id)
+        service = get_object_or_404(Service, **service_lookup)
         service.delete()
         return Response({"message": " service delete successfully"}, status=status.HTTP_200_OK)
 
