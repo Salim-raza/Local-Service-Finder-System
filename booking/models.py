@@ -22,6 +22,7 @@ class Booking(models.Model):
     cancellation_reason = models.TextField(null=True, blank=True)
     cancelled_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="cancelled_bookings")
     cancelled_at = models.DateTimeField(null=True, blank=True)
+    is_paid = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):

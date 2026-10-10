@@ -2,13 +2,13 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser
 from accounts.permission import IsCustomer, IsServiceProvider
-from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from django.core.mail import send_mail
 from django.utils import timezone
 from rest_framework import status
+from django.conf import settings
 from drf_yasg import openapi
 from .serializers import *
 from .models import *
@@ -17,15 +17,25 @@ from .models import *
 @swagger_auto_schema(
     method='POST',
     request_body=BookingSerializers,
-    # manual_parameters=[
-    #     openapi.Parameter('pk', openapi.IN_PATH, description="Service ID", type=openapi.TYPE_INTEGER)
-    # ],
     responses={201: BookingSerializers(), 400: 'Bad Request'},
+    manual_parameters=[
+        openapi.Parameter(
+            "booking_date", openapi.IN_FORM,
+            type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE,
+            description="YYYY-MM-DD", default="2026-10-15",
+        ),
+        openapi.Parameter(
+            "booking_time", openapi.IN_FORM,
+            type=openapi.TYPE_STRING,
+            description="HH:MM (24-hour)", default="14:30",
+        ),
+    ],
     operation_description="booking Create"
 )
 
 @api_view(["POST"])
 @permission_classes([IsCustomer])
+@parser_classes([MultiPartParser, FormParser])
 @authentication_classes([JWTAuthentication])
 @parser_classes([MultiPartParser, FormParser])
 def book_service(request):
