@@ -27,7 +27,7 @@ def category_list(request):
 @swagger_auto_schema(
     method="POST",
     request_body=CreateCategorySerializers,
-    responses={200: CreateCategorySerializers(), 400: "Bad Request"},
+    responses={201: CreatedCategoryResponseSerializer(), 400: "Bad Request"},
     operation_description="Create Category"
 )
 @api_view(["POST"])
@@ -64,7 +64,7 @@ def create_category(request):
             type=openapi.TYPE_INTEGER
         )
     ],
-    responses={204: 'Deleted successfully'}
+    responses={200: 'Deleted successfully'}
 )
 
 @api_view(["PATCH", "DELETE"])
@@ -91,16 +91,25 @@ def category_modify(request, id):
             "search",
             openapi.IN_QUERY,
             description="category search",
-            type=openapi.TYPE_STRING
+            type=openapi.TYPE_STRING,
+            required=True
         )
     ],
-    responses={200: CreateCategorySerializers(many=True)},
+    responses={
+        200: CategorySearchResponseSerializer(),
+        400: "Search parameter is required"
+    },
     operation_description="search category"
 ) 
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def category_search(request):
-    query = request.GET.get("search")
+    query = request.query_params.get("search", "").strip()
+    if not query:
+        return Response(
+            {"detail": "The search parameter is required."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
     category = Category.objects.filter(
         name__icontains = query
     )
