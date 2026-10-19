@@ -72,7 +72,7 @@ def create_category(request):
 @authentication_classes([JWTAuthentication])
 def category_modify(request, id):
     if request.method == "PATCH":
-        category = get_object_or_404(Category, id=id, user=request.user)
+        category = get_object_or_404(Category, id=id)
         serializer = CategoryUpdateSerializers(category, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
