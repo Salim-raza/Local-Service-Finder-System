@@ -150,7 +150,7 @@ def complete_booking(request, pk):
             {"message": "Only accepted bookings can be completed"},
             status=status.HTTP_400_BAD_REQUEST,
         )
-
+    booking.is_paid = True
     booking.status = Booking.Status.COMPLETED
     booking.completed_time = timezone.now()
     booking.save()
