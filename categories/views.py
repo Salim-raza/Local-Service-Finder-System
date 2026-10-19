@@ -79,7 +79,7 @@ def category_modify(request, id):
         return Response(serializer.data, status=status.HTTP_200_OK)
         
     if request.method == "DELETE":
-        category = get_object_or_404(Category, id=id, user=request.user)
+        category = get_object_or_404(Category, id=id)
         category.delete()
         return Response({"message": "category delete successful"}, status=status.HTTP_200_OK)
     
