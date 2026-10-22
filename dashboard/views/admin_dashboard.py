@@ -40,7 +40,7 @@ def admin_panel(request):
 @permission_classes([IsAdmin])
 def pending_account_active(request, pk):
     user = get_object_or_404(CustomUser, pk=pk)
-    if user.is_approved:
+    if user.is_approved and user.is_active:
         return Response({"error": "User already approved"},
             status=status.HTTP_400_BAD_REQUEST)
     
@@ -79,7 +79,7 @@ def pending_account_list(request):
 
 @swagger_auto_schema(
     method="GET",
-    Response={200: "total activate account"}, 
+    responses={200: "total activate account"}, 
     operation_description="total activate account count"
 )
 @api_view(["GET"])
@@ -97,12 +97,12 @@ def total_activate_account_count(request):
 
 @swagger_auto_schema(
     method="GET",
-    Response={200: "total activate account"}, 
+    responses={200: "total activate account"}, 
     operation_description="total activate account count"
 )
 @api_view(["GET"])
 @permission_classes([IsAdmin])
 @authentication_classes([JWTAuthentication])
 def total_activate_pending_count(request):
-    account =  CustomUser.objects.filter(role="SERVICE_PROVIDER", is_approved=False).count()
+    account =  CustomUser.objects.filter(role="SERVICE_PROVIDER", is_approved=False, is_active=False).count()
     return Response(account, status=status.HTTP_200_OK)
