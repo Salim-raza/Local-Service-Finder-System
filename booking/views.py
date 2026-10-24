@@ -22,12 +22,12 @@ from .models import *
         openapi.Parameter(
             "booking_date", openapi.IN_FORM,
             type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE,
-            description="YYYY-MM-DD", default="2026-10-15",
+            description="YYYY-MM-DD", default="2026-10-15"
         ),
         openapi.Parameter(
             "booking_time", openapi.IN_FORM,
             type=openapi.TYPE_STRING,
-            description="HH:MM (24-hour)", default="14:30",
+            description="HH:MM (24-hour)", default="14:30"
         ),
     ],
     operation_description="booking Create"
@@ -37,7 +37,6 @@ from .models import *
 @permission_classes([IsCustomer])
 @parser_classes([MultiPartParser, FormParser])
 @authentication_classes([JWTAuthentication])
-@parser_classes([MultiPartParser, FormParser])
 def book_service(request):
     serializer = BookingSerializers(data=request.data)
     serializer.is_valid(raise_exception=True)
