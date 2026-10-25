@@ -136,10 +136,7 @@ def search_service(request):
     services = Service.objects.filter(
         Q(name__icontains=query) | 
         Q(description__icontains=query)|
-        Q(category__name__icontains=query)|
-        Q(provider__district__name__icontains=query)|
-        Q(provider__upazila__name__icontains=query)|
-        Q(provider__area__name__icontains=query)
+        Q(category__name__icontains=query)
     ).order_by('id')
     if not services.exists():
         return Response({"detail": "Service Not Found"}, status=status.HTTP_404_NOT_FOUND)
