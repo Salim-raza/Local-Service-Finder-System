@@ -2,11 +2,12 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from drf_yasg.utils import swagger_auto_schema
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from accounts.permission import IsAdmin
 from rest_framework import status
 from drf_yasg import openapi
-from serializers import *
+from locations.serializers import *
 
 
 
@@ -76,4 +77,17 @@ def delete_district(request, pk):
     district = get_object_or_404(District, pk=pk)
     district.delete()
     return Response({"message": "district delete successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+
+@swagger_auto_schema(
+    method="GET",
+    responses={200: districtSerializers(many=True), 400: "Bad Request"},
+    operation_description="district list"
+)
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def district_list(request):
+    district = District.objects.all()
+    serializer = districtSerializers(district, many=True)
+    return Response({"district": serializer.data})
 

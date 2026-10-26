@@ -1,5 +1,5 @@
 from django.urls import path
-from views.upazila_views import *
+from locations.views.upazila_views import *
 
 
 urlpatterns = [

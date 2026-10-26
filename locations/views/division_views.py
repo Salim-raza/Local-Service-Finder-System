@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from accounts.permission import IsAdmin
 from rest_framework import status
 from drf_yasg import openapi
-from serializers import *
+from locations.serializers import *
 
 # Create your views here.
 @swagger_auto_schema(
