@@ -1,13 +1,13 @@
 from rest_framework.decorators import api_view, permission_classes, authentication_classes, parser_classes
-from accounts.permission import IsAdminORServiceProvider, IsAdmin, IsServiceProvider
+from accounts.permission import IsAdminORServiceProvider, IsAdmin, IsServiceProvider, IsCustomer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser
-from categories.serializers import CreateCategorySerializers
 from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
 from django.shortcuts import get_object_or_404
 from .pagination import MyPageNumberPagination
 from rest_framework.response import Response
+from accounts.models import CustomUser
 from rest_framework import status
 from django.db.models import Q
 from drf_yasg import openapi
@@ -118,22 +118,46 @@ def service_modify(request, id):
     method="GET",
     manual_parameters=[
         openapi.Parameter(
-            'search',
+            "upozila",
             openapi.IN_QUERY,
-            description="search query",
-            type=openapi.TYPE_STRING
-        )
+            description="upozila name",
+            type=openapi.TYPE_STRING,
+            required=True
+        ),
+        openapi.Parameter(
+            "area",
+            openapi.IN_QUERY,
+            description="area name",
+            type=openapi.TYPE_STRING,
+            required=True
+        ),
+        openapi.Parameter(
+            "search",
+            openapi.IN_QUERY,
+            description="Search service by name, description, or category",
+            type=openapi.TYPE_STRING,
+            required=True
+        ),
     ],
-    responses={200: ServiceCreateSerializers(many=True)}
+    responses={
+        200: ServiceCreateSerializers(many=True),
+        400: "Required query parameters are missing",
+        404: "Service not found in this location"
+    }
 )
-
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def search_service(request):
-    query = request.GET.get("search")
+    customer_area = request.query_params.get("area")
+    customer_upozila = request.query_params.get("upazila")
+    query = request.query_params.get("search")
     if not query:
         return Response({"message": "query missing"}, status=status.HTTP_400_BAD_REQUEST)
+
     services = Service.objects.filter(
+        provider__area__exact=customer_area,
+        provider__upazila__exact=customer_upozila,
+    ).filter(
         Q(name__icontains=query) | 
         Q(description__icontains=query)|
         Q(category__name__icontains=query)
