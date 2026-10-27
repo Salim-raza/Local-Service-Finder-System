@@ -32,6 +32,15 @@ from .models import *
     ],
     operation_description="booking Create"
 )
+# @swagger_auto_schema(
+#     method="POST",
+#     request_body=BookingSerializers,
+#     responses={
+#         201: BookingSerializers(),
+#         400: "Bad Request",
+#     },
+#     operation_description="Create a service booking",
+# )
 
 @api_view(["POST"])
 @permission_classes([IsCustomer])
@@ -40,7 +49,30 @@ from .models import *
 def book_service(request):
     serializer = BookingSerializers(data=request.data)
     serializer.is_valid(raise_exception=True)
-    booking = serializer.save(user=request.user)
+    service = serializer.validated_data["service"]
+    if not service.is_active:
+        return Response({
+            "error": "This service is not available."
+        }, status=status.HTTP_400_BAD_REQUEST)
+        
+    if service.pricing_type == Service.PricingType.FIXED:
+        price = service.base_price
+        
+    elif service.pricing_type == Service.PricingType.HOURLY:
+        price = service.hour_base_price
+
+    else:
+        return Response(
+            {"error": "This service requires a quotation before booking."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if price is None:
+        return Response(
+            {"error": "Service price is not configured."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    booking = serializer.save(user=request.user, price_at_booking=price)
     
     send_mail(
         subject="booking confirmation",

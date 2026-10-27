@@ -8,9 +8,11 @@ class BookingSerializers(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = [
             "completed_time",
+            "price_at_booking",
             "status",
             "user",
             "is_paid",
+            "payment_status",
             "cancellation_reason",
             "cancelled_by",
             "cancelled_at",
@@ -26,11 +28,11 @@ class BookingSerializers(serializers.ModelSerializer):
         
     def create(self, validated_data):
         service = validated_data["service"]
-        if not validated_data.get("final_price"):
-            validated_data["final_price"] = service.our_base_price
+        if not validated_data.get("price_at_booking"):
+            validated_data["price_at_booking"] = service.hour_base_price
         return super().create(validated_data)
         
 class BookingUpdateSerializers(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ["note", "booking_time", "booking_date", "final_price"]
+        fields = ["note", "booking_time", "booking_date"]
