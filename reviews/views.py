@@ -9,9 +9,10 @@ from rest_framework.response import Response
 from accounts.permission import IsCustomer
 from .models import ReviewAndRating
 from service.models import Service
+from booking.models import Booking
 from rest_framework import status
-from drf_yasg import openapi
 from django.db.models import Avg
+from drf_yasg import openapi
 # from accounts import models
 
 # Create your views here.
@@ -32,6 +33,20 @@ def get_review(request, service_id):
 
 @swagger_auto_schema(
     method="POST",
+    manual_parameters=[
+        openapi.Parameter(
+            'booking_id',
+            openapi.IN_QUERY,
+            description="Booking ID",
+            type=openapi.TYPE_INTEGER
+        ),
+        openapi.Parameter(
+            'service_id',
+            openapi.IN_QUERY,
+            description="Service ID",
+            type=openapi.TYPE_INTEGER
+        )
+    ],
     request_body=ReviewAndRatingSerializer,
     responses={201: ReviewAndRatingSerializer(), 400: "bd request"},
     operation_description="create review and rating"
@@ -41,9 +56,29 @@ def get_review(request, service_id):
 @authentication_classes([JWTAuthentication])
 @parser_classes([MultiPartParser, FormParser])
 def create_review_rating(request):
+    booking_id = request.query_params.get("booking_id")
+    if not booking_id:
+        return Response({"error": "booking_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        booking = Booking.objects.get(
+            id=booking_id,
+            user=request.user,
+            status=Booking.Status.COMPLETED
+        )
+    except Booking.DoesNotExist:
+        return Response({
+            "error": "completed booking not found"
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    if ReviewAndRating.objects.filter(booking=booking).exists():
+        return Response({"error": "review already exists"}, status=status.HTTP_400_BAD_REQUEST)
+    
     serializer = ReviewAndRatingSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    serializer.save(user=request.user)
+    serializer.save(
+        booking=booking,
+        service=booking.service,
+        user=request.user)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

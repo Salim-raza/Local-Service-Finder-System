@@ -1,10 +1,12 @@
-from django.db import models
-from django.conf import settings
-from service.models import Service
 from django.core.validators import MinValueValidator, MaxValueValidator
+from service.models import Service
+from booking.models import Booking
+from django.conf import settings
+from django.db import models
 # Create your models here.
 
 class ReviewAndRating(models.Model):
+    booking = models.OneToOneField(Booking, on_delete=models.PROTECT, related_name="reviews")
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='reviews')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews')
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
