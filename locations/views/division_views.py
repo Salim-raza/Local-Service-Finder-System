@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -74,3 +75,16 @@ def delete_division(request, pk):
     division = get_object_or_404(Division, pk=pk)
     division.delete()
     return Response({"message": "division delete successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+
+@swagger_auto_schema(
+    method="GET",
+    responses={200: divisionSerializers(many=True), 400: 'Bad Request'},
+    operation_description="get all division"
+)
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def division_list(request):
+    division = Division.objects.all()
+    serializer = divisionSerializers(division, many=True)
+    return Response({"division": serializer.data})

@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -74,3 +75,16 @@ def delete_upazila(request, pk):
     upazila = get_object_or_404(Upazila, pk=pk)
     upazila.delete()
     return Response({"message": "upazila delete successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+
+@swagger_auto_schema(
+    method="get",
+    responses={200: upazilaSerializers(many=True), 400: "Bad Request"},
+    operation_description="upazila list"
+)
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def upazila_list(request):
+    upazila = Upazila.objects.all()
+    serializer = upazilaSerializers(upazila, many=True)
+    return Response({"upazila": serializer.data})
