@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser
 from accounts.permission import IsCustomer, IsServiceProvider
+from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -9,6 +10,7 @@ from django.core.mail import send_mail
 from django.utils import timezone
 from rest_framework import status
 from django.conf import settings
+from decimal import Decimal, ROUND_HALF_UP
 from drf_yasg import openapi
 from .serializers import *
 from .models import *
@@ -32,16 +34,6 @@ from .models import *
     ],
     operation_description="booking Create"
 )
-# @swagger_auto_schema(
-#     method="POST",
-#     request_body=BookingSerializers,
-#     responses={
-#         201: BookingSerializers(),
-#         400: "Bad Request",
-#     },
-#     operation_description="Create a service booking",
-# )
-
 @api_view(["POST"])
 @permission_classes([IsCustomer])
 @parser_classes([MultiPartParser, FormParser])
@@ -49,59 +41,92 @@ from .models import *
 def book_service(request):
     serializer = BookingSerializers(data=request.data)
     serializer.is_valid(raise_exception=True)
+
     service = serializer.validated_data["service"]
+
     if not service.is_active:
-        return Response({
-            "error": "This service is not available."
-        }, status=status.HTTP_400_BAD_REQUEST)
-        
+        return Response(
+            {"error": "This service is not available."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     if service.pricing_type == Service.PricingType.FIXED:
         price = service.base_price
-        
+
     elif service.pricing_type == Service.PricingType.HOURLY:
-        price = service.hour_base_price
+        return Response(
+            {
+                "error": (
+                    "Hourly booking requires duration to calculate "
+                    "the total price."
+                )
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     else:
         return Response(
-            {"error": "This service requires a quotation before booking."},
-            status=status.HTTP_400_BAD_REQUEST
+            {
+                "error": (
+                    "This service requires a quotation before booking."
+                )
+            },
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
-    if price is None:
+    if price is None or price <= 0:
         return Response(
-            {"error": "Service price is not configured."},
-            status=status.HTTP_400_BAD_REQUEST
+            {"error": "Service price is not configured correctly."},
+            status=status.HTTP_400_BAD_REQUEST,
         )
-    booking = serializer.save(user=request.user, price_at_booking=price)
-    
-    send_mail(
-        subject="booking confirmation",
-        message=f"""
-            Dear {request.user.first_name}
 
-            Thank you for your booking request!
+    # Calculate mandatory 20% advance
+    advance_amount = (
+        price * Decimal("0.20")
+    ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    booking = serializer.save(
+        user=request.user,
+        price_at_booking=price,
+        advance_amount=advance_amount,
+        paid_amount=Decimal("0.00"),
+        payment_status=Booking.PaymentStatus.UNPAID,
+    )
+
+    try:
+        send_mail(
+            subject="Booking Confirmation",
+            message=f"""
+            Dear {request.user.first_name},
 
             Your booking request has been submitted successfully.
 
             Booking ID: {booking.id}
+            Service: {service.name}
+            Total Price: {booking.price_at_booking} BDT
+            Advance Amount (20%): {booking.advance_amount} BDT
 
-            What happens next?
-            • Your booking request has been sent to the service provider.
-            • The service provider will review your request.
-            • Once they accept it, your booking will be confirmed.
-            • We will notify you immediately after the booking is accepted.
+            The service provider will review your booking request.
 
-            Thank you for choosing our platform. We look forward to serving you!
-
+            Thank you for choosing our platform.
             Best Regards,
             Customer Support Team
-        """,
-        from_email=settings.EMAIL_HOST_USER,
-        recipient_list=[request.user.email],
-        fail_silently=False,
-    )
-    return Response({"message": "service book successful", "data": serializer.data}, status=status.HTTP_201_CREATED)
+            """,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[request.user.email],
+            fail_silently=False,
+        )
+    except Exception:
+        # Booking has already been created; don't return a false booking failure.
+        pass
 
+    return Response(
+        {
+            "message": "Service booking successful.",
+            "data": BookingSerializers(booking).data,
+        },
+        status=status.HTTP_201_CREATED,
+    )
 
 @swagger_auto_schema(
     method='PATCH',

@@ -9,10 +9,12 @@ class BookingSerializers(serializers.ModelSerializer):
         read_only_fields = [
             "completed_time",
             "price_at_booking",
+            "advance_amount",
+            "paid_amount",
+            "payment_status",
             "status",
             "user",
             "is_paid",
-            "payment_status",
             "cancellation_reason",
             "cancelled_by",
             "cancelled_at",
@@ -36,3 +38,4 @@ class BookingUpdateSerializers(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = ["note", "booking_time", "booking_date"]
+        
