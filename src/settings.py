@@ -38,7 +38,9 @@ INSTALLED_APPS = [
     'booking',
     'locations',
     'reviews',
-    'dashboard'
+    'dashboard',
+    'payments'
+    
 ]
 
 MIDDLEWARE = [
@@ -169,4 +171,12 @@ SIMPLE_JWT = {
     'SIGNING_KEY': SECRET_KEY,
 
     'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+
+
+SSLCOMMERZ_SETTINGS = {
+    "store_id": config("SSLCOMMERZ_STORE_ID"),
+    "store_pass": config("SSLCOMMERZ_STORE_PASSWORD"),
+    "issandbox": config("SSLCOMMERZ_IS_SANDBOX", default="True").lower() == "true"
 }
