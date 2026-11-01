@@ -169,6 +169,7 @@ def initiate_advance_payment(request):
         if booking.status in [
             Booking.Status.REJECTED,
             Booking.Status.CANCELLED,
+            Booking.Status.PENDING
         ]:
             return Response(
                 {"error": "Booking cannot be paid."},
@@ -261,12 +262,13 @@ def initiate_final_payment(request):
 
         remaining = booking.price_at_booking - booking.paid_amount
 
+
         if remaining <= 0:
             return Response(
-                {"error": "Booking is already fully paid."},
+                {"error": "No remaining amount."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
+            
         if Payment.objects.filter(
             booking=booking,
             purpose=Payment.Purpose.FINAL,
