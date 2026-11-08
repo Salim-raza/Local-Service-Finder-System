@@ -51,4 +51,4 @@ class Booking(models.Model):
         )
     
     def __str__(self):
-        return f"Booking #{self.id} - {self.user.email}"
+        return f"{self.id}  - Booking #{self.service.name} --- {self.user.name} --- {self.user.email}"

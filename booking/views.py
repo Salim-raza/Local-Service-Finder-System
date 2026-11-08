@@ -183,7 +183,7 @@ def cancel_booking(request, pk):
 @swagger_auto_schema(
     method='GET',
     responses={200: BookingSerializers(many=True), 400: 'Bad Request'},
-    operation_description="Get All Booking"
+    operation_description="Get All Booking (Service Provider)"
 )
 @api_view(["GET"])
 @permission_classes([IsServiceProvider])
@@ -192,3 +192,17 @@ def get_all_booking(request):
     booking = Booking.objects.filter(service__provider=request.user)
     serializers = BookingSerializers(booking, many=True)
     return Response({"message": "All booking", "data": serializers.data}, status=status.HTTP_200_OK)
+
+
+@swagger_auto_schema(
+    method='GET',
+    responses={200: BookingSerializers(many=True), 400: 'Bad Request'},
+    operation_description="Get My Bookings (Customer) — includes paid_amount and remaining_amount"
+)
+@api_view(["GET"])
+@permission_classes([IsCustomer])
+@authentication_classes([JWTAuthentication])
+def get_my_bookings(request):
+    bookings = Booking.objects.filter(user=request.user).order_by("-created_at")
+    serializer = BookingSerializers(bookings, many=True)
+    return Response({"message": "My bookings", "data": serializer.data}, status=status.HTTP_200_OK)
