@@ -153,6 +153,11 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD") # Use an app password, not y
 
 
 
+DEBUG = config("DEBUG", default=False, cast=bool)
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'Bearer': {
