@@ -153,6 +153,11 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD") # Use an app password, not y
 
 
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://local-service-finder-system.onrender.com",
+]
+
+
 DEBUG = config("DEBUG", default=False, cast=bool)
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
