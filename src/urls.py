@@ -37,7 +37,7 @@ urlpatterns = [
         path("location/upazilas/", include("locations.urls.upazila_urls")),
         path("payments/", include("payments.urls"))
     ])),
-   path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+   path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
    path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
