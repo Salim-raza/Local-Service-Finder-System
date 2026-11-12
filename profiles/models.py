@@ -4,9 +4,9 @@ from django.conf import settings
 
 class Profile(models.Model):
     GENDER_CHOICES = (
-        ('MALE', 'male'),
-        ('FEMALE', 'female'),
-        ('OTHER', 'other')
+        ('MALE', 'Male'),
+        ('FEMALE', 'Female'),
+        ('OTHER', 'Other')
     )
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     image = models.ImageField(upload_to="profile_image", null=True, blank=True)
