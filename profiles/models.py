@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from cloudinary.models import CloudinaryField
 # Create your models here.
 
 class Profile(models.Model):
@@ -9,7 +10,7 @@ class Profile(models.Model):
         ('OTHER', 'Other')
     )
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to="profile_image", null=True, blank=True)
+    image = CloudinaryField("profile_image", null=True, blank=True)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES , null=True, blank=True)
     city = models.CharField(max_length=400, null=True, blank=True)
     area = models.CharField(max_length=400, null=True, blank=True)

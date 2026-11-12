@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from categories.models import Category
+from cloudinary.models import CloudinaryField
 
 # Create your models here.
 class Service(models.Model):
@@ -11,7 +12,7 @@ class Service(models.Model):
         
     provider = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="services")
     name = models.CharField(max_length=200, db_index=True)
-    image = models.ImageField(upload_to="service_image", max_length=255)
+    image = CloudinaryField("service_image", null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="services")
     pricing_type = models.CharField( max_length=20, choices=PricingType.choices, default=PricingType.FIXED)

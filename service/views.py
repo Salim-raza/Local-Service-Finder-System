@@ -24,7 +24,9 @@ from .models import *
 @permission_classes([AllowAny])
 def all_service(request):
     service = Service.objects.all()
-    serializers = ServiceCreateSerializers(service, many=True)
+    pagination = MyPageNumberPagination()
+    paginated = pagination.paginate_queryset(service, request)
+    serializers = ServiceCreateSerializers(paginated, many=True)
     return Response({"service": serializers.data}, status=status.HTTP_200_OK)
 
 @swagger_auto_schema(

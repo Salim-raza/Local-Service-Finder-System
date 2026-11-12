@@ -2,6 +2,7 @@ from pathlib import Path
 from decouple import config
 from datetime import timedelta
 import dj_database_url
+import cloudinary
 import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     'dashboard',
     'payments',
     'corsheaders',
+    'cloudinary',
     
 ]
 
@@ -88,6 +90,13 @@ DATABASES = {
         config("DATABASE_URL")
     )
 }
+
+cloudinary.config(
+    cloud_name=config('CLOUDINARY_CLOUD_NAME'),
+    api_key=config('CLOUDINARY_API_KEY'),
+    api_secret=config('CLOUDINARY_API_SECRET'),
+    secure=True
+)
 
 
 # Password validation
@@ -197,3 +206,4 @@ SSLCOMMERZ_SETTINGS = {
     "issandbox": config("SSLCOMMERZ_IS_SANDBOX", default="True").lower() == "true"
     
 }
+
