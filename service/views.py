@@ -27,7 +27,7 @@ def all_service(request):
     pagination = MyPageNumberPagination()
     paginated = pagination.paginate_queryset(service, request)
     serializers = ServiceCreateSerializers(paginated, many=True)
-    return Response({"service": serializers.data}, status=status.HTTP_200_OK)
+    return pagination.get_paginated_response(serializers.data)
 
 @swagger_auto_schema(
     method='GET',
